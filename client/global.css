@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * Tailwind CSS theme
+   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
+   * A different format will require also updating the theme in tailwind.config.ts.
+  */
+  :root {
+    --background: 44 23% 97%;
+    --foreground: 220 13% 18%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 18%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 18%;
+
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 45 100% 51%;
+    --secondary-foreground: 220 13% 18%;
+
+    --muted: 44 23% 95%;
+    --muted-foreground: 220 13% 46%;
+
+    --accent: 31 100% 71%;
+    --accent-foreground: 220 13% 18%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 44 23% 88%;
+    --input: 44 23% 88%;
+    --ring: 142 76% 36%;
+
+    --radius: 12px;
+
+    /* Kindergarten-specific colors */
+    --success: 120 65% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 45 100% 51%;
+    --warning-foreground: 220 13% 18%;
+    --info: 210 100% 56%;
+    --info-foreground: 0 0% 100%;
+    --child-blue: 210 100% 75%;
+    --child-pink: 330 81% 78%;
+    --child-purple: 270 95% 82%;
+    --child-orange: 25 95% 65%;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 220 13% 9%;
+    --foreground: 44 23% 95%;
+
+    --card: 220 13% 12%;
+    --card-foreground: 44 23% 95%;
+
+    --popover: 220 13% 12%;
+    --popover-foreground: 44 23% 95%;
+
+    --primary: 142 76% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 13% 16%;
+    --secondary-foreground: 44 23% 95%;
+
+    --muted: 220 13% 16%;
+    --muted-foreground: 220 13% 65%;
+
+    --accent: 31 100% 65%;
+    --accent-foreground: 220 13% 9%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 16%;
+    --input: 220 13% 16%;
+    --ring: 142 76% 45%;
+
+    /* Dark mode kindergarten colors */
+    --success: 120 65% 50%;
+    --success-foreground: 0 0% 100%;
+    --warning: 45 100% 60%;
+    --warning-foreground: 220 13% 9%;
+    --info: 210 100% 65%;
+    --info-foreground: 0 0% 100%;
+    --child-blue: 210 100% 70%;
+    --child-pink: 330 81% 75%;
+    --child-purple: 270 95% 80%;
+    --child-orange: 25 95% 70%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

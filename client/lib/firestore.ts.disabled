@@ -1,0 +1,248 @@
+import { 
+  collection, 
+  doc, 
+  getDoc, 
+  getDocs, 
+  addDoc, 
+  updateDoc, 
+  query, 
+  where, 
+  orderBy, 
+  onSnapshot,
+  Timestamp 
+} from 'firebase/firestore';
+import { db } from './firebase';
+
+// Types for our Firestore collections
+export interface Child {
+  id: string;
+  name: string;
+  class: string;
+  teacher: string;
+  age: number;
+  photo?: string;
+  parentIds: string[];
+  kindergartenId: string;
+}
+
+export interface Parent {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  childrenIds: string[];
+  kindergartenId: string;
+  preferredLanguage: string;
+}
+
+export interface AttendanceRecord {
+  id: string;
+  childId: string;
+  date: Timestamp;
+  status: 'present' | 'absent' | 'late';
+  reportedBy?: string;
+  notes?: string;
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  description: string;
+  date: Timestamp;
+  classId?: string;
+  kindergartenId: string;
+  itemsNeeded?: EventItem[];
+  participants?: string[];
+}
+
+export interface EventItem {
+  id: string;
+  name: string;
+  quantity: number;
+  claimedBy?: string;
+  claimed: boolean;
+}
+
+export interface NewsItem {
+  id: string;
+  title: string;
+  content: string;
+  date: Timestamp;
+  kindergartenId: string;
+  language: string;
+  priority: 'low' | 'medium' | 'high';
+  readBy?: string[];
+}
+
+export interface ContractRequest {
+  id: string;
+  parentId: string;
+  childId: string;
+  type: 'schedule_change' | 'meal_plan' | 'pickup_authorization' | 'other';
+  description: string;
+  status: 'pending' | 'approved' | 'rejected';
+  submittedAt: Timestamp;
+  reviewedAt?: Timestamp;
+  reviewedBy?: string;
+  response?: string;
+}
+
+// Collection references
+export const collections = {
+  parents: collection(db, 'parents'),
+  children: collection(db, 'children'),
+  attendance: collection(db, 'attendance'),
+  events: collection(db, 'events'),
+  news: collection(db, 'news'),
+  contractRequests: collection(db, 'contractRequests'),
+};
+
+// Parent operations
+export const getParentById = async (parentId: string) => {
+  const docRef = doc(db, 'parents', parentId);
+  const docSnap = await getDoc(docRef);
+  return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Parent : null;
+};
+
+// Children operations
+export const getChildrenByParent = async (parentId: string) => {
+  const q = query(
+    collections.children, 
+    where('parentIds', 'array-contains', parentId)
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Child));
+};
+
+// Attendance operations
+export const getAttendanceForChild = async (childId: string, limit?: number) => {
+  const q = query(
+    collections.attendance,
+    where('childId', '==', childId),
+    orderBy('date', 'desc'),
+    ...(limit ? [limit] : [])
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AttendanceRecord));
+};
+
+export const reportAbsence = async (childId: string, date: Date, notes?: string) => {
+  try {
+    const attendanceRecord: Omit<AttendanceRecord, 'id'> = {
+      childId,
+      date: Timestamp.fromDate(date),
+      status: 'absent',
+      reportedBy: 'parent',
+      notes: notes || 'Reported by parent'
+    };
+    
+    await addDoc(collections.attendance, attendanceRecord);
+    return { success: true, error: null };
+  } catch (error) {
+    console.error('Error reporting absence:', error);
+    return { success: false, error: 'Failed to report absence' };
+  }
+};
+
+// Events operations
+export const getUpcomingEvents = async (kindergartenId: string) => {
+  const q = query(
+    collections.events,
+    where('kindergartenId', '==', kindergartenId),
+    where('date', '>=', Timestamp.now()),
+    orderBy('date', 'asc')
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
+};
+
+export const claimEventItem = async (eventId: string, itemId: string, parentId: string) => {
+  try {
+    const eventRef = doc(db, 'events', eventId);
+    const eventSnap = await getDoc(eventRef);
+    
+    if (eventSnap.exists()) {
+      const eventData = eventSnap.data() as Event;
+      const updatedItems = eventData.itemsNeeded?.map(item => 
+        item.id === itemId 
+          ? { ...item, claimed: true, claimedBy: parentId }
+          : item
+      );
+      
+      await updateDoc(eventRef, { itemsNeeded: updatedItems });
+      return { success: true, error: null };
+    }
+    
+    return { success: false, error: 'Event not found' };
+  } catch (error) {
+    console.error('Error claiming item:', error);
+    return { success: false, error: 'Failed to claim item' };
+  }
+};
+
+// News operations
+export const getRecentNews = async (kindergartenId: string, language = 'English') => {
+  const q = query(
+    collections.news,
+    where('kindergartenId', '==', kindergartenId),
+    where('language', '==', language),
+    orderBy('date', 'desc')
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NewsItem));
+};
+
+// Contract requests operations
+export const submitContractRequest = async (request: Omit<ContractRequest, 'id' | 'submittedAt' | 'status'>) => {
+  try {
+    const contractRequest: Omit<ContractRequest, 'id'> = {
+      ...request,
+      status: 'pending',
+      submittedAt: Timestamp.now()
+    };
+    
+    await addDoc(collections.contractRequests, contractRequest);
+    return { success: true, error: null };
+  } catch (error) {
+    console.error('Error submitting contract request:', error);
+    return { success: false, error: 'Failed to submit request' };
+  }
+};
+
+export const getContractRequestsByParent = async (parentId: string) => {
+  const q = query(
+    collections.contractRequests,
+    where('parentId', '==', parentId),
+    orderBy('submittedAt', 'desc')
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ContractRequest));
+};
+
+// Real-time listeners
+export const subscribeToChildAttendance = (childId: string, callback: (records: AttendanceRecord[]) => void) => {
+  const q = query(
+    collections.attendance,
+    where('childId', '==', childId),
+    orderBy('date', 'desc')
+  );
+  
+  return onSnapshot(q, (querySnapshot) => {
+    const records = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AttendanceRecord));
+    callback(records);
+  });
+};
+
+export const subscribeToEvents = (kindergartenId: string, callback: (events: Event[]) => void) => {
+  const q = query(
+    collections.events,
+    where('kindergartenId', '==', kindergartenId),
+    where('date', '>=', Timestamp.now()),
+    orderBy('date', 'asc')
+  );
+  
+  return onSnapshot(q, (querySnapshot) => {
+    const events = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
+    callback(events);
+  });
+};
