@@ -68,9 +68,7 @@ A modern kindergarten management system that helps parents stay connected with t
 - **React Query** for data fetching
 - **React Hook Form** for form management
 
-### Backend
-- **Express.js** with TypeScript
-- **Zod** for schema validation
+
 
 ### Development Tools
 - **TypeScript** for type safety
@@ -99,9 +97,8 @@ A modern kindergarten management system that helps parents stay connected with t
 - **Event Management** - View and manage kindergarten events
 - **One-Tap Reporting** - Quick absence reporting system
 - **Smart Notifications** - Real-time updates and announcements
-- **Multilingual Support** - News and updates in multiple languages
-- **Contract Management** - Request and track contract modifications
-
+- **Multilingual Support** - still not implemented
+- **Contract Management** - still not implemented
 ## 📱 User Roles
 
 - **Parents** - Access portal, track attendance, manage events
