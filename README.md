@@ -13,7 +13,7 @@ A modern kindergarten management system that helps parents stay connected with t
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/ZeinebGuellouz/KinderConnect.git
    cd KinderConnect
    ```
 
